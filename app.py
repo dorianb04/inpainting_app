@@ -27,7 +27,7 @@ def hex_to_rgb(hex):
 #### Affichage de l'application
 ###############################
 st.title("Reconstruisez vos photos avec un modèle d'inpainting")
-
+st.subheader("Réalisé par Dorian Boucher dans le cadre d'un PE encadré par l'UTT")
 bg_image = st.file_uploader("Selectionnez votre image à transformer :", type=["png", "jpg"])
 
 if bg_image:
