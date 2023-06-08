@@ -8,7 +8,6 @@ from PIL import Image, ImageDraw
 from PIL import ImageOps
 import torchvision.transforms as T
 from streamlit_drawable_canvas import st_canvas
-import base64
 
 ###############################
 #### Déclaration des variables
@@ -63,7 +62,7 @@ if bg_image:
         width=500,
         height=500,
         drawing_mode=drawing_mode,
-        point_display_radius=point_display_radius if drawing_mode == 'point' else 0,
+        #point_display_radius=point_display_radius if drawing_mode == 'point' else 0,
         display_toolbar=st.sidebar.checkbox("Affichage des outils d'édition de l'image", True),
         key="full_app",
     )
