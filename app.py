@@ -30,6 +30,7 @@ def hex_to_rgb(hex):
 st.title("Reconstruisez vos photos avec un modèle d'inpainting")
 st.subheader("Réalisé par Dorian Boucher dans le cadre d'un PE encadré par l'UTT")
 bg_image = st.file_uploader("Selectionnez votre image à transformer :", type=["png", "jpg"])
+img_name = bg_image.name
 
 if bg_image:
     bg_image = ImageOps.exif_transpose(Image.open(bg_image))
@@ -106,7 +107,7 @@ if bg_image:
             btn = st.download_button(
                 label="Téléchargez votre nouvelle image",
                 data=byte_im,
-                file_name=f"inpainted_{bg_image.name}.png",
+                file_name=f"inpainted_{img_name}.png",
                 mime="image/jpeg",
             )
 
