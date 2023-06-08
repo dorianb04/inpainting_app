@@ -5,6 +5,7 @@ from torchvision import transforms
 import torch
 import cv2
 from PIL import Image, ImageDraw
+from PIL import ImageOps
 import torchvision.transforms as T
 from streamlit_drawable_canvas import st_canvas
 
@@ -31,6 +32,7 @@ st.subheader("Réalisé par Dorian Boucher dans le cadre d'un PE encadré par l'
 bg_image = st.file_uploader("Selectionnez votre image à transformer :", type=["png", "jpg"])
 
 if bg_image:
+    bg_image = ImageOps.exif_transpose(Image.open(bg_image))
     with st.sidebar:
         drawing_mode = st.selectbox(
             "Type de dessin:",
@@ -44,7 +46,7 @@ if bg_image:
         realtime_update = st.checkbox("Transformation en temps réel", True)
 
 
-    padding_data = torch.load('utils/padding_data.pt')
+        padding_data = torch.load('utils/padding_data.pt')
 
 
     st.markdown("## Selectionnez la partie de l'image que vous souhaitez éditer")
@@ -52,12 +54,12 @@ if bg_image:
     canvas_result = st_canvas(
                 fill_color="rgba(255, 165, 0, 0.3)",  # Fixed fill color with some opacity
                 stroke_width=stroke_width,
-                stroke_color=f"rgba({stroke_color[0]}, {stroke_color[1]}, {stroke_color[2]}, 0.3)",
+                stroke_color=f"rgba({stroke_color[0]}, {stroke_color[1]}, {stroke_color[2]}, 0.5)",
                 background_color=bg_color,
-                background_image=Image.open(bg_image) if bg_image else None,
+                background_image=bg_image,
                 update_streamlit=realtime_update,
-                width=700,
-                height=700,
+                width=500,
+                height=500,
                 drawing_mode=drawing_mode,
                 point_display_radius=point_display_radius if drawing_mode == 'point' else 0,
                 display_toolbar=st.sidebar.checkbox("Affichage des outils d'édition de l'image", True),
@@ -70,7 +72,7 @@ if bg_image:
             # Tranformation du masque et de l'image obtenue
 
             # Transformation de l'image de base en tenseur pytorch 64x64
-            img_base = transform_input_image(Image.open(bg_image))[:3]
+            img_base = transform_input_image(bg_image)[:3]
 
             # Transformation du masque obtenu en matrice 64x64 normalisée entre 0 et 1
             mask = cv2.resize((255 - canvas_result.image_data[:, :, 3])/255, (64, 64))
@@ -92,9 +94,9 @@ if bg_image:
             preds = generator(img_masked_combined, mask_combined)[0]
 
             # Affichage des résultats
-            st.markdown("### Votre image reconstruite par le modèle d'inpainting")
-            st.markdown("###### (Limité pour le moment en 64x64)")
-            st.image(T.ToPILImage()(preds), width=700)
+            st.markdown("### Votre image restaurée par le modèle d'inpainting")
+            st.markdown("###### (Limité pour le moment en qualité 64x64)")
+            st.image(T.ToPILImage()(preds), width=500)
 
             # Création du bouton de téléchargement de l'image générée
             buf = BytesIO()
