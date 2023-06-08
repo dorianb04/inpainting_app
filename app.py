@@ -8,6 +8,7 @@ from PIL import Image, ImageDraw
 from PIL import ImageOps
 import torchvision.transforms as T
 from streamlit_drawable_canvas import st_canvas
+import base64
 
 ###############################
 #### Déclaration des variables
@@ -21,8 +22,10 @@ transform_input_image = transforms.Compose([
     transforms.ToTensor()
 ])
 
+
 def hex_to_rgb(hex):
-  return tuple(int(hex[i:i+2], 16) for i in (0, 2, 4))
+    return tuple(int(hex[i:i + 2], 16) for i in (0, 2, 4))
+
 
 ###############################
 #### Affichage de l'application
@@ -46,26 +49,24 @@ if bg_image:
         bg_color = "#eee"
         realtime_update = st.checkbox("Transformation en temps réel", True)
 
-
         padding_data = torch.load('utils/padding_data.pt')
-
 
     st.markdown("## Selectionnez la partie de l'image que vous souhaitez éditer")
 
     canvas_result = st_canvas(
-                fill_color="rgba(255, 165, 0, 0.3)",  # Fixed fill color with some opacity
-                stroke_width=stroke_width,
-                stroke_color=f"rgba({stroke_color[0]}, {stroke_color[1]}, {stroke_color[2]}, 0.5)",
-                background_color=bg_color,
-                background_image=bg_image,
-                update_streamlit=realtime_update,
-                width=500,
-                height=500,
-                drawing_mode=drawing_mode,
-                point_display_radius=point_display_radius if drawing_mode == 'point' else 0,
-                display_toolbar=st.sidebar.checkbox("Affichage des outils d'édition de l'image", True),
-                key="full_app",
-            )
+        fill_color="rgba(255, 165, 0, 0.3)",  # Fixed fill color with some opacity
+        stroke_width=stroke_width,
+        stroke_color=f"rgba({stroke_color[0]}, {stroke_color[1]}, {stroke_color[2]}, 0.5)",
+        background_color=bg_color,
+        background_image=bg_image,
+        update_streamlit=realtime_update,
+        width=500,
+        height=500,
+        drawing_mode=drawing_mode,
+        point_display_radius=point_display_radius if drawing_mode == 'point' else 0,
+        display_toolbar=st.sidebar.checkbox("Affichage des outils d'édition de l'image", True),
+        key="full_app",
+    )
 
     # Do something interesting with the image data and paths
     if canvas_result.image_data is not None:
@@ -76,7 +77,7 @@ if bg_image:
             img_base = transform_input_image(bg_image)[:3]
 
             # Transformation du masque obtenu en matrice 64x64 normalisée entre 0 et 1
-            mask = cv2.resize((255 - canvas_result.image_data[:, :, 3])/255, (64, 64))
+            mask = cv2.resize((255 - canvas_result.image_data[:, :, 3]) / 255, (64, 64))
 
             # Transformation de la matrice du masque avec des 1 pour les pixels non masqués et des 0 pour les pixels masqués
             mask[mask != 1] = 0
@@ -110,5 +111,3 @@ if bg_image:
                 file_name=f"inpainted_{img_name}.png",
                 mime="image/jpeg",
             )
-
-
